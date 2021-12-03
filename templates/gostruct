@@ -1,0 +1,151 @@
+// Code generated converter.
+// DO NOT EDIT!
+package {{.PkgName}}
+
+import (
+    "encoding/json"
+    "errors"
+    "fmt"
+    "io/ioutil"
+    "strconv"
+    "strings"
+
+    "github.com/tealeg/xlsx"
+)
+
+var _ = errors.New
+var _ = fmt.Println
+var _ = strconv.Itoa
+var _ = strings.Split
+{{$meta :=.Meta}}
+type {{$meta.Name}} struct { {{range $col :=$meta.Cols}}
+    {{$col.Name}} {{gostr $col.Kind}} // {{$col.Comment}}{{end}}
+}
+
+var {{$meta.Name}}Single = new({{$meta.Name}}File)
+
+type {{$meta.Name}}File struct {
+    Array []*{{$meta.Name}}
+}
+
+func (t *{{$meta.Name}}File) LoadJson(p string) error {
+    b, err := ioutil.ReadFile(p)
+    if err != nil {
+        return err
+    }
+    return json.Unmarshal(b, t)
+}
+
+func (t *{{$meta.Name}}File) LoadXlsx(p string) error {
+    f, err := xlsx.OpenFile(p)
+    if err != nil {
+        return err
+    }
+
+    if len(f.Sheets) == 0 {
+        return nil
+    }
+
+    rows := f.Sheets[0].Rows
+    if len(rows) < 3 {
+        return nil
+    }
+
+    var line *xlsx.Row
+    for _, line = range rows[2:] {
+        _ = line
+        l := len(line.Cells)
+        _ = l
+        r := new({{$meta.Name}})
+        for { {{range $col :=$meta.Cols}}
+            if l < {{$col.Index}} + 1 {
+                break
+            }
+        {{if keq .Kind "bool"}}
+            r.{{$col.Name}} = line.Cells[{{$col.Index}}].Bool()
+        {{else if keq .Kind "string"}}
+            r.{{$col.Name}} = line.Cells[{{$col.Index}}].String()
+        {{else if keq .Kind "int32"}}
+            n{{$col.Index}}, err := line.Cells[{{$col.Index}}].Int()
+            if err != nil {
+                return errors.New(fmt.Sprintf("{{$col.Name}} error:%v", err))
+            }
+            r.{{$col.Name}} = int32(n{{$col.Index}}){{else if keq .Kind "int64"}}
+            n{{$col.Index}}, err := line.Cells[{{$col.Index}}].Int()
+            if err != nil {
+                return errors.New(fmt.Sprintf("{{$col.Name}} error:%v", err))
+            }
+            r.{{$col.Name}} = int64(n{{$col.Index}})
+        {{else if keq .Kind "int"}}
+            if r.{{$col.Name}}, err = line.Cells[{{$col.Index}}].Int(); err != nil {
+                return errors.New(fmt.Sprintf("{{$col.Name}} error:%v", err))
+            }
+        {{else if keq .Kind "float32"}}
+            n{{$col.Index}}, err := line.Cells[{{$col.Index}}].Float()
+            if err != nil {
+                return errors.New(fmt.Sprintf("{{$col.Name}} error:%v", err))
+            }
+            r.{{$col.Name}} = float32(n{{$col.Index}})
+        {{else if keq .Kind "float64"}}
+            if r.{{$col.Name}}, err = line.Cells[{{$col.Index}}].Float(); err != nil {
+                return errors.New(fmt.Sprintf("{{$col.Name}} error:%v", err))
+            }
+        {{else if keq .Kind "[]bool"}}
+            for _, v := range strings.Split(line.Cells[{{$col.Index}}].String(), ",") {
+                b, err := strconv.ParseBool(v)
+                if err != nil {
+                    return errors.New(fmt.Sprintf("{{$col.Name}} error:%v", err))
+                }
+                r.{{$col.Name}} = append(r.{{$col.Name}}, b)
+            }
+        {{else if keq .Kind "[]string"}}
+            for _, v := range strings.Split(line.Cells[{{$col.Index}}].String(), ",") {
+                r.{{$col.Name}} = append(r.{{$col.Name}}, v)
+            }
+        {{else if keq .Kind "[]int32"}}
+            for _, v := range strings.Split(line.Cells[{{$col.Index}}].String(), ",") {
+                i, err := strconv.ParseInt(v, 10, 32)
+                if err != nil {
+                    return errors.New(fmt.Sprintf("{{$col.Name}} error:%v", err))
+                }
+                r.{{$col.Name}} = append(r.{{$col.Name}}, int32(i))
+            }
+        {{else if keq .Kind "[]int64"}}
+            for _, v := range strings.Split(line.Cells[{{$col.Index}}].String(), ",") {
+                i, err := strconv.ParseInt(v, 10, 64)
+                if err != nil {
+                    return errors.New(fmt.Sprintf("{{$col.Name}} error:%v", err))
+                }
+                r.{{$col.Name}} = append(r.{{$col.Name}}, i)
+            }
+        {{else if keq .Kind "[]int"}}
+            for _, v := range strings.Split(line.Cells[{{$col.Index}}].String(), ",") {
+                i, err := strconv.ParseInt(v, 10, 64)
+                if err != nil {
+                    return errors.New(fmt.Sprintf("{{$col.Name}} error:%v", err))
+                }
+                r.{{$col.Name}} = append(r.{{$col.Name}}, int(i))
+            }
+        {{else if keq .Kind "[]float32"}}
+            for _, v := range strings.Split(line.Cells[{{$col.Index}}].String(), ",") {
+                i, err := strconv.ParseFloat(v, 32)
+                if err != nil {
+                    return errors.New(fmt.Sprintf("{{$col.Name}} error:%v", err))
+                }
+                r.{{$col.Name}} = append(r.{{$col.Name}}, float32(i))
+            }
+        {{else if keq .Kind "[]float64"}}
+            for _, v := range strings.Split(line.Cells[{{$col.Index}}].String(), ",") {
+                i, err := strconv.ParseFloat(v, 64)
+                if err != nil {
+                    return errors.New(fmt.Sprintf("{{$col.Name}} error:%v", err))
+                }
+                r.{{$col.Name}} = append(r.{{$col.Name}}, i)
+            }
+        {{end}}{{end}}
+            break
+        }
+        t.Array = append(t.Array, r)
+    }
+    return nil
+}

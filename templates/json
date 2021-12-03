@@ -1,0 +1,7 @@
+{ {{$data := .}}{{$cl := len .Cols}}{{$cn := add $cl -1}}{{$dl := len .Data}}{{$dn := add $dl -1}}
+    "Array": [{{range $di,$line := $data.Data}}
+        { {{range $i, $cell := $line}}{{$c := index $data.Cols $i}}
+            "{{$c.Name}}":{{$cell}}{{if ne $i $cn}},{{end}}{{end}}
+        }{{if ne $di $dn}},{{end}}{{end}}
+    ]
+}

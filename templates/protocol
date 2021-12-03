@@ -1,0 +1,12 @@
+// Code generated converter.
+// DO NOT EDIT!
+syntax = "proto3";
+
+option go_package = "/{{.PkgName}}";
+
+package {{.PkgName}};
+{{$meta :=.Meta}}
+message {{$meta.Name}} { {{range $index, $col :=$meta.Cols}}{{if $col.IsArray}}
+    repeated {{ptstr $col.Kind}} {{$col.Name}} = {{incr $index}}; // {{$col.Comment}}{{else}}
+    {{ptstr $col.Kind}} {{$col.Name}} = {{incr $index}}; // {{$col.Comment}}{{end}}{{end}}
+}

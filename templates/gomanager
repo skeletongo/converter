@@ -48,12 +48,14 @@ func (m *Manager) Load(name string) error {
         p = strings.ReplaceAll(p, string({{separator}}), string(os.PathSeparator))
     }
 
-    p = fmt.Sprintf("%s.xlsx", p)
-    md5str, err := getMD5(p)
+    pXlsx := fmt.Sprintf("%s.xlsx", p)
+    md5str, err := getMD5(pXlsx)
     if err == nil {
         if md5str != t.MD5 {
+            if err = t.T.LoadXlsx(pXlsx); err != nil {
+                return err
+            }
             t.MD5 = md5str
-            return t.T.LoadXlsx(p)
         }
         return nil
     }
@@ -62,12 +64,14 @@ func (m *Manager) Load(name string) error {
         return err
     }
 
-    p = fmt.Sprintf("%s.json", p)
-    md5str, err = getMD5(p)
+    pJson := fmt.Sprintf("%s.json", p)
+    md5str, err = getMD5(pJson)
     if err == nil {
         if md5str != t.MD5 {
+            if err = t.T.LoadJson(pJson); err != nil {
+                return err
+            }
             t.MD5 = md5str
-            return t.T.LoadJson(p)
         }
         return nil
     }
@@ -112,7 +116,7 @@ func Init(path string) error {
 }
 
 // Load 重新加载文件数据
-// name 文件名，不含文件后缀
+// name 文件名
 func Load(name string) error {
-    return ManagerSingle.Load(name)
+    return ManagerSingle.Load(strings.TrimRight(filepath.Base(name),filepath.Ext(name)))
 }

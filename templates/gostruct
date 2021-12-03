@@ -33,6 +33,7 @@ func (t *{{$meta.Name}}File) LoadJson(p string) error {
     if err != nil {
         return err
     }
+    t.Array = t.Array[:0]
     return json.Unmarshal(b, t)
 }
 
@@ -50,6 +51,8 @@ func (t *{{$meta.Name}}File) LoadXlsx(p string) error {
     if len(rows) < 3 {
         return nil
     }
+
+    t.Array = t.Array[:0]
 
     var line *xlsx.Row
     for _, line = range rows[2:] {

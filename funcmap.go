@@ -30,6 +30,6 @@ var FM = template.FuncMap{
 		return filepath.Separator
 	},
 	"filename": func(s string) string {
-		return strings.TrimRight(filepath.Base(s), ".xlsx")
+		return strings.TrimRight(filepath.Base(s), filepath.Ext(s))
 	},
 }

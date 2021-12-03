@@ -1,2 +1,2 @@
 # converter
-excel配置文件转go,json,protobuffer
+excel配置文件转Go,Json,ProtocolBuffers

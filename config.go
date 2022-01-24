@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"log"
 	"os"
 )
@@ -44,7 +43,7 @@ func (c *Config) Init() {
 }
 
 func Load(filepath string) {
-	bytes, err := ioutil.ReadFile(filepath)
+	bytes, err := os.ReadFile(filepath)
 	if err != nil && !os.IsNotExist(err) {
 		log.Fatalln("load config error:", err)
 	}

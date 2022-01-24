@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -118,7 +117,7 @@ func FindFilepath(dir string, f func(info os.FileInfo) bool) (infos []string, er
 		return
 	}
 	if info.IsDir() {
-		files, err := ioutil.ReadDir(dir)
+		files, err := os.ReadDir(dir)
 		if err != nil {
 			return nil, err
 		}

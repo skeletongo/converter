@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -15,11 +16,15 @@ import (
 
 //go:embed templates
 var templates embed.FS
-var temps = template.Must(template.New("").Funcs(FM).ParseFS(templates, "templates/*"))
+var temps *template.Template
 
 func main() {
 	// 读取配置文件
-	Load("config.json")
+	InitConfig()
+
+	FM["mapseparate"] = func() string { return Cfg.Mapseparate }
+
+	temps = template.Must(template.New("").Funcs(FM).ParseFS(templates, "templates/*"))
 
 	// 查找所有xlsx文件路径
 	paths, err := FindXlsxPath(Cfg.ExcelDir)
@@ -64,12 +69,12 @@ func Run(path string) {
 	meta.Name = strings.TrimSuffix(file.Name(), ".xlsx")
 
 	// 生成json文件
-	if len(xlsxFile.Sheets) > 0 {
-		rows := xlsxFile.Sheets[0].Rows
-		if len(rows) > 2 {
-			CreateJsonFile(meta, rows[2:])
-		}
-	}
+	//if len(xlsxFile.Sheets) > 0 {
+	//	rows := xlsxFile.Sheets[0].Rows
+	//	if len(rows) > 2 {
+	//		CreateJsonFile(meta, rows[2:])
+	//	}
+	//}
 
 	// 生成protobuf文件
 	func() {
@@ -80,13 +85,24 @@ func Run(path string) {
 		}
 		defer f.Close()
 		if err = temps.ExecuteTemplate(f, "protocol", struct {
-			PkgName string
-			Meta    *MetaData
+			GoPackage string
+			Package   string
+			Meta      *MetaData
 		}{
-			filepath.Base(Cfg.ProtocolDir), meta,
+			Cfg.GoPackage, Cfg.ProtoPackage, meta,
 		}); err != nil {
 			log.Printf("generate protobuf error:%v filepath:%s\n", err, path)
 			return
+		}
+
+		// protoc --proto_path=./protocol --plugin=protoc-gen-go=. --go_out=. ./protocol/*
+		err = exec.Command(Cfg.Protoc,
+			fmt.Sprintf("--proto_path=%v", Cfg.ProtocolDir),
+			fmt.Sprintf("--plugin=protoc-gen-go=%v", Cfg.ProtocGenGo),
+			fmt.Sprintf("--go_out=%v", Cfg.ProtocGoOut),
+			fmt.Sprintf("%v/*.proto", Cfg.ProtocolDir)).Run()
+		if err != nil {
+			log.Printf("protoc exec error:%v\n", err)
 		}
 	}()
 

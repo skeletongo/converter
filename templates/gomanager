@@ -1,5 +1,6 @@
 // Code generated converter.
 // DO NOT EDIT!
+
 package {{.PkgName}}
 
 import (

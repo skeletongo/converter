@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+const DefaultMapSeparate = ";"
+
 // 内部数据类型
 const (
 	Invalid = iota
@@ -25,12 +27,14 @@ const (
 	KindArrFloat32
 	KindArrFloat64
 	KindArrDouble
+	KindMap
 )
 
 // XlsxToKind xlsx数据类型和内部数据类型映射表
 var XlsxToKind = map[string]int{
 	"(bool)":       KindBool,
 	"(string)":     KindString,
+	"(str)":        KindString,
 	"(int32)":      KindInt32,
 	"(int64)":      KindInt64,
 	"(int)":        KindInt,
@@ -39,12 +43,14 @@ var XlsxToKind = map[string]int{
 	"(double)":     KindDouble,
 	"(arrbool)":    KindArrBool,
 	"(arrstring)":  KindArrString,
+	"(arrstr)":     KindArrString,
 	"(arrint32)":   KindArrInt32,
 	"(arrint64)":   KindArrInt64,
 	"(arrint)":     KindArrInt,
 	"(arrfloat32)": KindArrFloat32,
 	"(arrfloat64)": KindArrFloat64,
 	"(arrdouble)":  KindArrDouble,
+	"(map)":        KindMap,
 }
 
 // KindToProto 内部数据类型和protobuf数据类型映射表
@@ -65,6 +71,22 @@ var KindToProto = map[int]string{
 	KindArrFloat32: "float",
 	KindArrFloat64: "double",
 	KindArrDouble:  "double",
+	KindMap:        "map<int64, int64>",
+}
+
+func GetKindToProto(k int) string {
+	switch k {
+	case KindInt:
+		if Cfg.IntToInt32 {
+			return KindToProto[KindInt32]
+		}
+	case KindArrInt:
+		if Cfg.IntToInt32 {
+			return KindToProto[KindArrInt32]
+		}
+	default:
+	}
+	return KindToProto[k]
 }
 
 var KindToGo = map[int]string{
@@ -72,7 +94,7 @@ var KindToGo = map[int]string{
 	KindString:     "string",
 	KindInt32:      "int32",
 	KindInt64:      "int64",
-	KindInt:        "int",
+	KindInt:        "int64",
 	KindFloat32:    "float32",
 	KindFloat64:    "float64",
 	KindDouble:     "float64",
@@ -80,10 +102,26 @@ var KindToGo = map[int]string{
 	KindArrString:  "[]string",
 	KindArrInt32:   "[]int32",
 	KindArrInt64:   "[]int64",
-	KindArrInt:     "[]int",
+	KindArrInt:     "[]int64",
 	KindArrFloat32: "[]float32",
 	KindArrFloat64: "[]float64",
 	KindArrDouble:  "[]float64",
+	KindMap:        "map[int64]int64",
+}
+
+func GetKindToGo(k int) string {
+	switch k {
+	case KindInt:
+		if Cfg.IntToInt32 {
+			return KindToGo[KindInt32]
+		}
+	case KindArrInt:
+		if Cfg.IntToInt32 {
+			return KindToGo[KindArrInt32]
+		}
+	default:
+	}
+	return KindToGo[k]
 }
 
 func PathExists(path string) (bool, error) {

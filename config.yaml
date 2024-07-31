@@ -1,0 +1,20 @@
+# excel目录，默认excel
+ExcelDir:
+# proto目录，默认protocol
+ProtocolDir:
+# go代码目录，默认 gostruct
+GostructDir:
+# map类型分隔符，默认为“;”
+Mapseparate:
+# Int 类型，默认为int64，true为int32
+IntToInt32:
+# proto3 go_package 参数值, 默认为/gostruct
+GoPackage:
+# proto3 package 参数值，默认为 gostruct
+ProtoPackage:
+# protoc 程序，默认为 ./protoc
+protoc: ./protoc.exe
+# protoc --plugin=protoc-gen-go= 参数值，默认为 ./protoc-gen-go
+ProtocGenGo: ./protoc-gen-go.exe
+# protoc --go_out= 参数值，默认为 .
+ProtocGoOut:

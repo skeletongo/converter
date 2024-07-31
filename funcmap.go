@@ -15,16 +15,16 @@ var FM = template.FuncMap{
 		return n + v
 	},
 	"ptstr": func(k int) string {
-		return KindToProto[k]
+		return GetKindToProto(k)
 	},
 	"gostr": func(k int) string {
-		return KindToGo[k]
+		return GetKindToGo(k)
 	},
 	"now": func() string {
 		return time.Now().Format(time.RFC3339)
 	},
 	"keq": func(k int, s string) bool {
-		return KindToGo[k] == s
+		return GetKindToGo(k) == s
 	},
 	"separator": func() int32 {
 		return filepath.Separator
